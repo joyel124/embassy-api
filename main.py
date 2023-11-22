@@ -346,6 +346,22 @@ class DeleteUserIdAppointment(Resource):
                            (True, None, appointment_id))
             conn.commit()
 
+            get_emails_query = """SELECT Email FROM User WHERE Looking_Appointment = 1"""
+            cursor.execute(get_emails_query)
+            rows = cursor.fetchall()
+            email_list = [row[0] for row in rows]
+
+            print(email_list)
+
+            params = {
+                "from": "Embassy <noreply@joyel.tech>",
+                "to": email_list,
+                "subject": "New Appointment available!",
+                "html": "<strong>New Appointment available!</strong>",
+            }
+            email = resend.Emails.send(params)
+            print(email)
+
             response = jsonify(message='Appointment status updated successfully')
             response.status_code = 200
         except Exception as e:
